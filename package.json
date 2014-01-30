@@ -1,0 +1,33 @@
+{
+  "name": "html_game",
+  "version": "0.0.0",
+  "description": "A simple html5 online game",
+  "main": "index.js",
+  "dependencies": {
+    "connect": "~2.12.0",
+    "socket.io": "~0.9.16"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Agent-H/html_game.git"
+  },
+  "keywords": [
+    "html5",
+    "canvas",
+    "game",
+    "socket.io",
+    "real-time"
+  ],
+  "author": "Hadrien Milano",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "2ccb867d0f6f11171c2ce6c124bbc18ad60e7dac",
+  "bugs": {
+    "url": "https://github.com/Agent-H/html_game/issues"
+  }
+}

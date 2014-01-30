@@ -1,4 +1,10 @@
 html_game
 =========
 
-A simple HTML5 online game with node
+A simple HTML5 online game with node.
+Features:
+- master/slave architecture with node server running the actual simulation and
+web instances running a lightweight projection based on server updates.
+- (todo) diff updates
+- (todo) lagg compensation
+- (todo) GC optimization
