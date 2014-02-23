@@ -24,7 +24,10 @@
     WORLD_WIDTH: 900,
     WORLD_HEIGHT: 500,
     // keeps the 20 last frames in memory
-    HISTORY_DEPTH: 20
+    HISTORY_DEPTH: 20,
+
+    // Network
+    MIN_LATENCY: 60
   };
 
   return config;

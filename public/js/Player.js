@@ -33,12 +33,10 @@
     },
 
     moveForward: function() {
-      this.attrs.vx = config.PLAYER_FWD_SPEED * Math.cos(this.attrs.angle);
-      this.attrs.vy = config.PLAYER_FWD_SPEED * Math.sin(this.attrs.angle);
+      this.attrs.vx = config.PLAYER_FWD_SPEED;
     },
     moveBackward: function() {
-      this.attrs.vx = -config.PLAYER_BWD_SPEED * Math.cos(this.attrs.angle);
-      this.attrs.vy = -config.PLAYER_BWD_SPEED * Math.sin(this.attrs.angle);
+      this.attrs.vx = -config.PLAYER_BWD_SPEED;
     },
 
     hit: function() {
@@ -72,7 +70,7 @@
       this.move(dt);
       this.rotate(dt);
     }
-  }, mixins.TwoD, mixins.Mobile, mixins.Orientable, mixins.Actor);
+  }, mixins.TwoD, mixins.DirectionalMobile, mixins.Orientable, mixins.Actor);
 
   return Player;
 }));

@@ -8,7 +8,7 @@
   } else {
     define(deps, factory);
   }
-}(['Player'], function(Player){
+}(['Player', './config'], function(Player, config){
 
   return {
     init: function(args) {
@@ -25,19 +25,17 @@
           'fetch',
           {keys: input.keys, lastFrame: model.getState().timestamp},
           function (data) {
-
+            var t1 = Date.now();
             try {
               if (data.diff !== undefined) {
-                console.log('update');
                 model.update(data.diff);
               } else if (data.state !== undefined) {
-                console.log('reset');
                 model.setStateFromSnapshot(data.state);
               }
             } catch (e) {
               console.error(e.stack);
             }
-            pullState();
+            setTimeout(pullState, config.MIN_LATENCY - (Date.now() - t1));
           }
         );
       }

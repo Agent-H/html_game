@@ -2,9 +2,7 @@ var game = require('./public/js/Game');
 var Model = require('./public/js/GameModel');
 var Player = require('./public/js/Player');
 var Input = require('./public/js/Input');
-
-
-var MIN_LATENCY = 60;
+var config = require('./public/js/config')
 
 
 exports.listen = function(io) {
@@ -62,14 +60,20 @@ exports.listen = function(io) {
       input.keys = data.keys;
 
       var time = Date.now();
-      if (time - lastFetch < MIN_LATENCY) {
+
+      // This is only used to avoid flooding, clients should implement this timer themselves.
+      if (time - lastFetch < config.MIN_LATENCY) {
         setTimeout(function(){
           lastFetch = Date.now();
           transmitState(data, ack);
-        }, MIN_LATENCY - (time - lastFetch));
+        }, config.MIN_LATENCY - (time - lastFetch));
+
       } else {
         lastFetch = time;
+        // lagg simulation:
+        //setTimeout(function(){
         transmitState(data, ack);
+        //}, Math.random() * 250);
       }
     });
   });

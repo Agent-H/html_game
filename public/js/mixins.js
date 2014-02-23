@@ -22,6 +22,19 @@
       }
     },
 
+    // Mobile which movement depends on the orientation (like a car)
+    // Depends on 2D and Orientable
+    DirectionalMobile: {
+      attrs: {
+        vx: 0,
+        vy: 0
+      },
+      move: function (dt) {
+        this.attrs.x += (this.attrs.vx * Math.cos(this.attrs.angle) + this.attrs.vy * Math.sin(this.attrs.angle)) * dt;
+        this.attrs.y += (this.attrs.vx * Math.sin(this.attrs.angle) + this.attrs.vy * Math.cos(this.attrs.angle)) * dt;
+      }
+    },
+
     TwoD: {
       attrs: {
         x: 0,

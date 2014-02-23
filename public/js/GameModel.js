@@ -14,12 +14,25 @@
   function GameModel() {
     this.state = new GameState();
 
+    this._isMaster = true;
     this._history = new History(config.HISTORY_DEPTH);
+
+    this.projectedTime = 0;
   }
+
+  GameModel.prototype.setSlaveMode = function() {
+    this._isMaster = false;
+    this.step = this._project;
+  };
+
+  GameModel.prototype.setMastrerMode = function() {
+    this._isMaster = true;
+    this.step = this._simulate;
+  };
 
 
   /* Makes the simulation move forward by dt */
-  GameModel.prototype.simulate = function(dt) {
+  GameModel.prototype._simulate = function(dt) {
     if (dt < 0) throw new Error('In an isolated system, entropy can only increase');
 
     // movement
@@ -33,11 +46,12 @@
   };
 
   /* Projects the simulation by dt time in the future without actually computing it */
-  GameModel.prototype.project = function(dt) {
+  GameModel.prototype._project = function(dt) {
     this._move(dt);
+    this.projectedTime += dt;
   };
 
-  GameModel.prototype.step = GameModel.prototype.simulate;
+  GameModel.prototype.step = GameModel.prototype._simulate;
 
   /*
     Updates the model with a diff.
@@ -51,6 +65,10 @@
     this.state.applySnapshot(snap);
     this.state.applyDiff(diff);
     this._history.add(this.state.takeSnapshot());
+
+    if (!this._isMaster) {
+      this._compensateUpdateLagg();
+    }
   };
 
   // Returns a snapshot for the provided timestamp
@@ -65,6 +83,10 @@
   GameModel.prototype.setStateFromSnapshot = function (snap) {
     this.state.applySnapshot(snap);
     this._history.add(snap);
+
+    if (!this._isMaster) {
+      this._compensateUpdateLagg();
+    }
   };
 
   GameModel.prototype.getState = function() {
@@ -97,6 +119,27 @@
 
   GameModel.prototype.getBullets = function() {
     return this.state.bullets;
+  };
+
+  // Some updates take more time to arrive. This compensates for it.
+  // But it may get out of sync and project into the future...
+  // Better solution : low-pass filter the delta between updates time and projected time
+  // So that the latter follows the former without bursts.
+  GameModel.prototype._compensateUpdateLagg = function() {
+    var delta = this.projectedTime - this.state.timestamp;
+    this.projectedTime = this.state.timestamp;
+    if (delta > 0) {
+
+      var it = parseInt(delta / 30);
+      var r = delta % 30;
+
+      for (var i = 0 ; i < it ; i++) {
+        this.step(30);
+      }
+      if (r != 0) {
+        this.step(r);
+      }
+    }
   };
 
   GameModel.prototype._move = function(dt) {
@@ -270,11 +313,11 @@
       if (this.players[id] === undefined) {
         this.players[id] = new Player(diff.newPlayers[i]);
       } else {
-        //this.players[id].setAttributes(diff.newPlayers[i]);
+        this.players[id].setAttributes(diff.newPlayers[i]);
       }
     }
     for (var i in diff.delPlayers) {
-      delete this.players[diff.delPlayers[i].id];
+      delete this.players[diff.delPlayers[i]];
     }
     for (var i in diff.players) {
       this.players[i].setAttributes(diff.players[i]);

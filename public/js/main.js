@@ -10,7 +10,7 @@ require(['Game', 'Input', 'GameModel', 'GameView', 'Network'],
   game.addModule(view);
 
   // We activate the lazy simulation for the client
-  game.model.step = game.model.project;
+  game.model.setSlaveMode();
 
   Network.init({
     model: game.model,
