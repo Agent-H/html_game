@@ -8,7 +8,7 @@
   } else {
     define(deps, factory);
   }
-}([], function () {
+}(['./game'], function (game) {
 
   var mixins = {
     Mobile: {
@@ -47,10 +47,10 @@
     // Things that have an action on the model
     Actor: {
       model: null,
-      setModel: function (model) {
-        this.model = model
+      init: function() {
+        this.model = game.model;
       }
-    },
+    }
   }
   return mixins;
 }));

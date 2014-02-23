@@ -8,11 +8,13 @@
   } else {
     define(deps, factory);
   }
-}(['./ObjectsFactory', './GameObject', './config', './mixins', './Player', './Bullet'],
-  function(ObjectsFactory, GameObject, config, mixins, Player, Bullet){
+}(['./ObjectsFactory', './GameObject', './config', './mixins', './Player', './Bullet', './History'],
+  function(ObjectsFactory, GameObject, config, mixins, Player, Bullet, History){
 
   function GameModel() {
     this.state = new GameState();
+
+    this._history = new History(config.HISTORY_DEPTH);
   }
 
 
@@ -24,6 +26,10 @@
     this._move(dt);
     // collisions
     this._resolveCollisions();
+
+    // Saving snapshot
+    this.state.setTimestamp();
+    this._history.add(this.state.takeSnapshot());
   };
 
   /* Projects the simulation by dt time in the future without actually computing it */
@@ -35,20 +41,21 @@
 
   /*
     Updates the model with a diff.
-    /!\ Expects diff "from" timestamp to match current frame timestamp
   */
   GameModel.prototype.update = function(diff) {
-    if (diff.from !== this.getLastFrame().timestamp) {
-      throw new Error('Diff should only diff with last frame.');
+    var snap = this._history.get(diff.from);
+    if (snap == null) {
+      console.error("dropped !");
+      return;
     }
-
-    throw new Error('Not yet implemented');
+    this.state.applySnapshot(snap);
+    this.state.applyDiff(diff);
+    this._history.add(this.state.takeSnapshot());
   };
 
-  // Returns the frame at the given timestamp or null otherwise
-  GameModel.prototype.getFrame = function(timestamp) {
-    throw new Error('Not yet implemented');
-    return null;
+  // Returns a snapshot for the provided timestamp
+  GameModel.prototype.getSnapshot = function(timestamp) {
+    return this._history.get(timestamp);
   };
 
   GameModel.prototype.setState = function (newState) {
@@ -57,6 +64,7 @@
 
   GameModel.prototype.setStateFromSnapshot = function (snap) {
     this.state.applySnapshot(snap);
+    this._history.add(snap);
   };
 
   GameModel.prototype.getState = function() {
@@ -64,7 +72,6 @@
   };
 
   GameModel.prototype.addPlayer = function(player) {
-    player.setModel(this);
     this.state.addPlayer(player);
   };
 
@@ -78,6 +85,10 @@
 
   GameModel.prototype.getPlayers = function() {
     return this.state.players;
+  };
+
+  GameModel.prototype.getPlayer = function(id) {
+    return this.state.players[id];
   };
 
   GameModel.prototype.addBullet = function(bullet) {
@@ -137,9 +148,13 @@
   function GameState() {
     this.players = {};
     this.bullets = {};
+    this.timestamp = 0;
   }
 
   GameState.prototype.applySnapshot = function(snap) {
+
+    this.timestamp = snap.timestamp;
+
     var newPlayers = {};
     for (var i in snap.players) {
       if (this.players[i] === undefined) {
@@ -166,7 +181,8 @@
   GameState.prototype.takeSnapshot = function() {
     var snap = {
       players: {},
-      bullets: {}
+      bullets: {},
+      timestamp: this.timestamp
     };
 
     for (var i in this.players) {
@@ -180,12 +196,105 @@
     return snap;
   };
 
-  GameState.prototype.makeDiff = function() {
-    throw new Error('Not implemented');
+  GameState.prototype.makeDiff = function(snap) {
+    var attrsDiff;
+
+    var diff = {
+      from: snap.timestamp,
+      to: this.timestamp,
+
+      newPlayers: [],
+      delPlayers: [],
+      players: {},
+
+      newBullets: [],
+      delBullets: [],
+      bullets: {}
+    };
+
+    // Players
+    for (var i in snap.players) {
+      // A -> (delete)
+      if (this.players[i] === undefined) {
+        diff.delPlayers.push(i);
+      }
+      // A -> B
+      else {
+        attrsDiff = this.players[i].makeAttrsDiff(snap.players[i]);
+        if (Object.keys(attrsDiff).length !== 0) {
+          diff.players[i] = attrsDiff;
+        }
+      }
+    }
+
+    for (var i in this.players) {
+      // (new) -> B
+      if (snap.players[i] === undefined ) {
+        diff.newPlayers.push(this.players[i].attrs);
+      }
+    }
+
+    // Bullets
+    for (var i in snap.bullets) {
+      // A -> (delete)
+      if (this.bullets[i] === undefined) {
+        diff.delBullets.push(i);
+      }
+      // A -> B
+      else {
+        attrsDiff = this.bullets[i].makeAttrsDiff(snap.bullets[i]);
+        if (Object.keys(attrsDiff).length !== 0) {
+          diff.bullets[i] = attrsDiff;
+        }
+      }
+    }
+
+    for (var i in this.bullets) {
+      // (new) -> B
+      if (snap.bullets[i] === undefined ) {
+        diff.newBullets.push(this.bullets[i].attrs);
+      }
+    }
+
+    return diff;
   };
 
-  GameState.prototype.applyDiff = function() {
+  GameState.prototype.applyDiff = function(diff) {
+    var id;
 
+    this.timestamp = diff.to;
+
+    // Players
+    for (var i in diff.newPlayers) {
+      id = diff.newPlayers[i].id;
+      if (this.players[id] === undefined) {
+        this.players[id] = new Player(diff.newPlayers[i]);
+      } else {
+        //this.players[id].setAttributes(diff.newPlayers[i]);
+      }
+    }
+    for (var i in diff.delPlayers) {
+      delete this.players[diff.delPlayers[i].id];
+    }
+    for (var i in diff.players) {
+      this.players[i].setAttributes(diff.players[i]);
+    }
+
+    //Bullets
+    for (var i in diff.newBullets) {
+      id = diff.newBullets[i].id;
+      if (this.bullets[id] === undefined) {
+        this.bullets[id] = new Bullet(diff.newBullets[i]);
+      } else {
+        this.bullets[id].setAttributes(diff.newBullets[i]);
+      }
+    }
+    for (var i in diff.delBullets) {
+      delete this.bullets[diff.delBullets[i]];
+    }
+    for (var i in diff.bullets) {
+      this.bullets[i].setAttributes(diff.bullets[i]);
+    }
   };
 
 
@@ -211,6 +320,10 @@
 
   GameState.prototype.removeBulletId = function(id) {
     delete this.bullets[id];
+  };
+
+  GameState.prototype.setTimestamp = function() {
+    this.timestamp = Date.now();
   };
 
   return GameModel;

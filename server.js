@@ -1,9 +1,8 @@
-var Game = require('./public/js/Game');
+var game = require('./public/js/game');
 var Model = require('./public/js/GameModel');
 var Player = require('./public/js/Player');
 var Input = require('./public/js/Input');
 
-var game = new Game();
 
 var MIN_LATENCY = 60;
 
@@ -19,20 +18,18 @@ exports.listen = function(io) {
     }
   };
 
-  game.start();
-
-  var model = new Model();
-
+  var model = game.model = new Model();
   game.addModule(inputs);
-
   game.addModule(model);
+
+  game.start();
 
   io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('log', 'user connected');
     var player = new Player();
 
-    var input = new Input();
-    input.setPlayer(player);
+    var input = new Input(model);
+    input.setPlayerId(player.attrs.id);
     inputs.clients[player.attrs.id] = input;
 
     socket.on('disconnect', function() {
@@ -48,14 +45,16 @@ exports.listen = function(io) {
     });
 
     function transmitState(data, ack) {
-      // var lastFrame = model.getFrame(data.lastFrameTS);
+      if (typeof data.lastFrame !== 'undefined') {
+        var snap = model.getSnapshot(data.lastFrame);
+        if (snap != null) {
+          ack({diff: model.getState().makeDiff(snap)});
+          return;
+        }
+      }
 
-      //if (lastFrame == null) {
-        ack({state: model.getState().takeSnapshot()}); // Full update
-      /*} else {
-        ack({diff: model.getLastFrame().makeDiff(lastFrame)});  // Partial update
-        console.log('hit');
-      }*/
+      // In case we could not perform diff update
+      ack({state: model.getState().takeSnapshot()}); // Full update
     }
 
     var lastFetch = 0;

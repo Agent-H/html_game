@@ -23,7 +23,7 @@
         var time = Date.now();
         socket.emit(
           'fetch',
-          {keys: input.keys/*, lastFrameTS: model.getLastFrame().timestamp*/},
+          {keys: input.keys, lastFrame: model.getState().timestamp},
           function (data) {
 
             try {
@@ -51,8 +51,8 @@
           var player = new Player(p);
 
           model.addPlayer(player);
-          input.setPlayer(player);
-          view.setPlayer(player);
+          input.setPlayerId(p.id);
+          view.setPlayerId(p.id);
 
         });
       });

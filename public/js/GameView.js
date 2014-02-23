@@ -14,11 +14,11 @@
     this.ctx = canvas.getContext('2d');
 
     this.model = model;
-    this.player = null;
+    this.playerId = null;
   }
 
-  GameView.prototype.setPlayer = function(player) {
-    this.player = player;
+  GameView.prototype.setPlayerId = function(pid) {
+    this.playerId = pid;
   };
 
   GameView.prototype.render = GameView.prototype.step = function() {
@@ -36,8 +36,7 @@
 
     ctx.fillStyle = '#f00';
     for (var i in players) {
-      if (!players[i].isDead() &&
-        (this.player === undefined || players[i].attrs.id != this.player.attrs.id)) {
+      if (!players[i].isDead() && players[i].attrs.id != this.playerId) {
         this.drawArrow(players[i].attrs, ctx);
       }
     }
@@ -70,31 +69,34 @@
   };
 
   GameView.prototype.drawPlayer = function(ctx) {
-    if (this.player === null) {
+    if (this.playerId === null) {
       ctx.fillStyle = '#ff0';
       ctx.font = "20pt Arial";
       ctx.fillText("Press j to join.", 250, 200);
-    } else if (this.player.isDead()) {
-      ctx.fillStyle = '#ff0';
-      ctx.font = "20pt Arial";
-      ctx.fillText("You are dead.", 300, 200);
-      ctx.fillText("Press j to join.", 250, 300);
     } else {
-      var p = this.player.attrs;
+      var player = this.model.getPlayer(this.playerId);
+      if (player == null || player.isDead()) {
+        ctx.fillStyle = '#ff0';
+        ctx.font = "20pt Arial";
+        ctx.fillText("You are dead.", 300, 200);
+        ctx.fillText("Press j to join.", 250, 300);
+      } else {
+        p = player.attrs;
 
-      ctx.fillStyle = '#00f';
-      this.drawArrow(p, ctx);
+        ctx.fillStyle = '#00f';
+        this.drawArrow(p, ctx);
 
-      ctx.fillStyle = '#c11';
-      ctx.strokeStyle = '#faa';
-      this.drawHeart(100, 100, ctx);
+        ctx.fillStyle = '#c11';
+        ctx.strokeStyle = '#faa';
+        this.drawHeart(100, 100, ctx);
 
-      for (var i = 0 ; i < config.PLAYER_INITIAL_LIVES ; i++) {
-        ctx.beginPath();
-        this.drawHeart(i*30+20, 10, ctx);
-        if (i < p.lives)
-          ctx.fill();
-        ctx.stroke();
+        for (var i = 0 ; i < config.PLAYER_INITIAL_LIVES ; i++) {
+          ctx.beginPath();
+          this.drawHeart(i*30+20, 10, ctx);
+          if (i < p.lives)
+            ctx.fill();
+          ctx.stroke();
+        }
       }
     }
   };

@@ -30,13 +30,13 @@
       return out;
     },
 
-    makeDiff: function(other) {
+    makeAttrsDiff: function(otherAttrs) {
       // other and this are assumed to have the same attribute names
       // TODO OPTI: diff consumes volatile memory
       var diff = {};
       for (var i in this.attrs) {
-        if (this.attrs[i] != other.attrs[i]) {
-          diff[i] = other.attrs[i];
+        if (this.attrs[i] != otherAttrs[i]) {
+          diff[i] = this.attrs[i];
         }
       }
 

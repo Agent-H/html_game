@@ -17,7 +17,7 @@
   var KEY_SPACE = 32;
   var KEY_J = 74;
 
-  function Input() {
+  function Input(model) {
     this.keys = {
       left: false,
       right: false,
@@ -26,11 +26,16 @@
       space: false
     };
 
-    this.player = null;
+    this.playerId = null;
+    this.model = model;
   }
 
-  Input.prototype.setPlayer = function(player) {
-    this.player = player;
+  Input.prototype.setPlayerId = function(pid) {
+    this.playerId = pid;
+  };
+
+  Input.prototype._getPlayer = function() {
+    return this.model.getPlayer(this.playerId);
   };
 
   Input.prototype.listen = function() {
@@ -54,7 +59,7 @@
           keys.down = true;
           break;
         case KEY_J:
-          if (self.player == null || self.player.isDead())
+          if (self.playerId == null || self._getPlayer().isDead())
             self.trigger('join');
         case KEY_SPACE:
             keys.space = true;
@@ -93,21 +98,23 @@
   };
 
   Input.prototype.step = function() {
-    if (this.player === null || this.player.isDead()) return;
 
-    this.player.resetControls();
+    var player = this._getPlayer();
+    if (this.playerId === null || player == null || player.isDead()) return;
+
+    player.resetControls();
 
     if (this.keys.left)
-      this.player.turnLeft();
+      player.turnLeft();
     else if (this.keys.right)
-      this.player.turnRight();
+      player.turnRight();
     if (this.keys.up)
-      this.player.moveForward();
+      player.moveForward();
     else if (this.keys.down)
-      this.player.moveBackward();
+      player.moveBackward();
 
     if (this.keys.space && this.canFire) {
-      this.player.fire();
+      player.fire();
       this.canFire = false;
     }
     else if (!this.keys.space)

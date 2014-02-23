@@ -1,15 +1,12 @@
-require(['Game', 'Input', 'GameModel', 'GameView', 'Network'],
-  function(Game, Input, GameModel, GameView, Network){
+require(['game', 'Input', 'GameModel', 'GameView', 'Network'],
+  function(game, Input, GameModel, GameView, Network){
 
-  var game = new Game(document.getElementById('canvas'));
-
-  var input = new Input();
-
+  var model = game.model = new GameModel();
+  var input = new Input(model);
+  var view = new GameView(canvas, game.model);
 
   game.addModule(input);
-  game.addModule((game.model = new GameModel()));
-
-  var view = new GameView(canvas, game.model);
+  game.addModule(model);
   game.addModule(view);
 
   // We activate the lazy simulation for the client

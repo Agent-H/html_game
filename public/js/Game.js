@@ -9,7 +9,7 @@
     define(deps, factory);
   }
 }(['./Tick'], function(Tick){
-  function Game(canvas) {
+  function Game() {
     this.modules = [];
 
     this.tick = new Tick(this.loop, this);
@@ -33,5 +33,5 @@
     this.tick.start();
   }
 
-  return Game;
+  return new Game();
 }));
