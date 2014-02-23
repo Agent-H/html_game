@@ -1,4 +1,4 @@
-require(['game', 'Input', 'GameModel', 'GameView', 'Network'],
+require(['Game', 'Input', 'GameModel', 'GameView', 'Network'],
   function(game, Input, GameModel, GameView, Network){
 
   var model = game.model = new GameModel();

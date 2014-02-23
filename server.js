@@ -1,4 +1,4 @@
-var game = require('./public/js/game');
+var game = require('./public/js/Game');
 var Model = require('./public/js/GameModel');
 var Player = require('./public/js/Player');
 var Input = require('./public/js/Input');

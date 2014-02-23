@@ -8,7 +8,7 @@
   } else {
     define(deps, factory);
   }
-}(['./game'], function (game) {
+}(['./Game'], function (game) {
 
   var mixins = {
     Mobile: {
