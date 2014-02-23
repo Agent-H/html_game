@@ -12,25 +12,25 @@
 
   var EventEmitter = {
 
-    on: function(evt, cb) {
-      if (this._listeners === undefined) {
-        this._listeners = {};
-      }
+    // Shamelessly copied from https://github.com/jeromeetienne/microevent.js
 
-      if (this._listeners[evt] === undefined) {
-        this._listeners[evt] = [];
-      }
-
-      this._listeners[evt].push(cb);
+    on: function(event, fct){
+      this._events = this._events || {};
+      this._events[event] = this._events[event] || [];
+      this._events[event].push(fct);
     },
 
-    trigger: function(evt, data) {
-      if (this._listeners === undefined || this._listeners[evt] === undefined) {
-        return;
-      }
+    off: function(event, fct){
+      this._events = this._events || {};
+      if( event in this._events === false  )  return;
+      this._events[event].splice(this._events[event].indexOf(fct), 1);
+    },
 
-      for (var i in this._listeners[evt]) {
-        this._listeners[evt][i](data);
+    trigger: function(event /* , args... */){
+      this._events = this._events || {};
+      if( event in this._events === false  )  return;
+      for(var i = 0; i < this._events[event].length; i++){
+        this._events[event][i].apply(this, Array.prototype.slice.call(arguments, 1));
       }
     }
   }

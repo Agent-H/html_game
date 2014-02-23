@@ -8,7 +8,7 @@
   } else {
     define(deps, factory);
   }
-}(['Player', './config'], function(Player, config){
+}(['Player', './config', './eventsManager'], function(Player, config, eventsManager){
 
   return {
     init: function(args) {
@@ -27,6 +27,7 @@
           function (data) {
             var t1 = Date.now();
             try {
+              eventsManager.sendAllMaster(data.evt);
               if (data.diff !== undefined) {
                 model.update(data.diff);
               } else if (data.state !== undefined) {

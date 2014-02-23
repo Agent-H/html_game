@@ -23,6 +23,17 @@
         }
       }
       return out;
+    },
+
+    defaults: function(out) {
+      var srcs = Array.prototype.slice.call(arguments, 1);
+      for (var i in srcs) {
+        for (var j in srcs[i]) {
+          if (out[j] === undefined)
+            out[j] = srcs[i][j];
+        }
+      }
+      return out;
     }
   };
 

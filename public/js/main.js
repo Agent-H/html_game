@@ -1,5 +1,5 @@
-require(['Game', 'KeyboardInput', 'GameModel', 'GameView', 'Network'],
-  function(game, Keyboard, GameModel, GameView, Network){
+require(['Game', 'KeyboardInput', 'GameModel', 'GameView', 'Network', './eventsManager'],
+  function(game, Keyboard, GameModel, GameView, Network, eventsManager){
 
   var model = game.model = new GameModel();
   var input = new Keyboard();
@@ -9,8 +9,9 @@ require(['Game', 'KeyboardInput', 'GameModel', 'GameView', 'Network'],
   game.addModule(model);
   game.addModule(view);
 
-  // We activate the lazy simulation for the client
+  // The client is not master in the simulation
   game.model.setSlaveMode();
+  eventsManager.setSlaveMode();
 
   Network.init({
     model: game.model,

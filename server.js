@@ -3,7 +3,7 @@ var Model = require('./public/js/GameModel');
 var Player = require('./public/js/Player');
 var Input = require('./public/js/InputController');
 var config = require('./public/js/config')
-
+var events = require('./public/js/eventsManager');
 
 exports.listen = function(io) {
 
@@ -26,6 +26,9 @@ exports.listen = function(io) {
     socket.broadcast.emit('log', 'user connected');
     var player = new Player();
 
+    var eventsBuffer = [];
+    events.on('any', onEvent);
+
     var input = new Input();
     input.setPlayerId(player.attrs.id);
     inputs.clients[player.attrs.id] = input;
@@ -33,6 +36,7 @@ exports.listen = function(io) {
     socket.on('disconnect', function() {
       socket.broadcast.emit('log', 'user disconnected');
       model.removePlayer(player);
+      events.off('any', onEvent);
       delete inputs.clients[player.attrs.id];
     });
 
@@ -42,17 +46,24 @@ exports.listen = function(io) {
       ack(player.attrs);
     });
 
+    // buffers game events to send to client
+    function onEvent(type, data) {
+      eventsBuffer.push({type: type, data: data});
+    }
+
     function transmitState(data, ack) {
       if (typeof data.lastFrame !== 'undefined') {
         var snap = model.getSnapshot(data.lastFrame);
         if (snap != null) {
-          ack({diff: model.getState().makeDiff(snap)});
+          ack({diff: model.getState().makeDiff(snap), evt: eventsBuffer});
+          eventsBuffer.length = 0;
           return;
         }
       }
 
       // In case we could not perform diff update
-      ack({state: model.getState().takeSnapshot()}); // Full update
+      ack({state: model.getState().takeSnapshot(), evt: eventsBuffer}); // Full update
+      eventsBuffer.length = 0;
     }
 
     var lastFetch = 0;

@@ -8,8 +8,29 @@
   } else {
     define(deps, factory);
   }
-}(['./ObjectsFactory', './config', './mixins', './Bullet', './Game'],
-  function(ObjectsFactory, config, mixins, Bullet, game){
+}(['./ObjectsFactory', './config', './mixins', './Bullet', './Game', './eventsManager', './effects/Explosion', './effectsManager'],
+  function(ObjectsFactory, config, mixins, Bullet, game, events, Explosion, effectsManager){
+
+  effectsManager.addEffect(
+    'playerHit',
+    Explosion,
+    {
+      particles: 4,
+      color: '#0ff',
+      maxSpeed: 0.07,
+      minSpeed: 0.03,
+      life: 200
+    });
+  effectsManager.addEffect(
+    'playerDead',
+    Explosion,
+    {
+      particles: 20,
+      color: '#c92',
+      maxSpeed: 0.3,
+      life: 1000
+    });
+
   var Player = ObjectsFactory.create({
     attrs: {
       name: 'anonymous',
@@ -35,14 +56,21 @@
 
     moveForward: function() {
       this.attrs.vx = config.PLAYER_FWD_SPEED;
+
+      events.send('mvFwd', {x: this.attrs.x, y: this.attrs.y});
     },
     moveBackward: function() {
       this.attrs.vx = -config.PLAYER_BWD_SPEED;
     },
 
     hit: function() {
-      if (this.attrs.lives > 0)
-        this.attrs.lives --;
+      if (this.attrs.lives > 0) {
+        if (--this.attrs.lives <= 0) {
+          events.send('playerDead', this.dumpAttributes());
+        } else {
+          events.send('playerHit', this.dumpAttributes());
+        }
+      }
     },
 
     isDead: function() {

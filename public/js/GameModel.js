@@ -22,6 +22,7 @@
 
   GameModel.prototype.setSlaveMode = function() {
     this._isMaster = false;
+
     // Activate this if simulation is too heavy (only projects)
     // this.step = this._project;
   };

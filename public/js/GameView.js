@@ -8,7 +8,7 @@
   } else {
     define(deps, factory);
   }
-}(['config'], function(config){
+}(['config', './effectsManager'], function(config, effectsManager){
 
   function GameView(canvas, model) {
     this.ctx = canvas.getContext('2d');
@@ -21,12 +21,13 @@
     this.playerId = pid;
   };
 
-  GameView.prototype.render = GameView.prototype.step = function() {
+  GameView.prototype.render = GameView.prototype.step = function(dt) {
     var model = this.model;
     var ctx = this.ctx;
 
     var players = model.getPlayers();
     var bullets = model.getBullets();
+    var effects = effectsManager.getEffects();
     var p;
 
     // Clear screen
@@ -34,6 +35,7 @@
     ctx.fillRect(0, 0, config.WORLD_WIDTH, config.WORLD_HEIGHT);
 
 
+    // players
     ctx.fillStyle = '#f00';
     for (var i in players) {
       if (!players[i].isDead() && players[i].attrs.id != this.playerId) {
@@ -41,6 +43,7 @@
       }
     }
 
+    // bullets
     ctx.fillStyle = '#ff0';
     for (var i in bullets) {
       p = bullets[i].attrs;
@@ -48,8 +51,13 @@
       ctx.fillRect(p.x, p.y, 2, 2);
     }
 
-
+    // current player
     this.drawPlayer(ctx);
+
+    // effects
+    for (var i in effects) {
+      effects[i].draw(ctx, dt);
+    }
   };
 
   GameView.prototype.drawArrow = function(p, ctx) {
