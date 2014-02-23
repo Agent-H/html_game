@@ -22,7 +22,8 @@
 
   GameModel.prototype.setSlaveMode = function() {
     this._isMaster = false;
-    this.step = this._project;
+    // Activate this if simulation is too heavy (only projects)
+    // this.step = this._project;
   };
 
   GameModel.prototype.setMastrerMode = function() {
@@ -41,8 +42,12 @@
     this._resolveCollisions();
 
     // Saving snapshot
-    this.state.setTimestamp();
-    this._history.add(this.state.takeSnapshot());
+    if (this._isMaster) {
+      this.state.setTimestamp();
+      this._history.add(this.state.takeSnapshot());
+    } else {
+      this.projectedTime += dt;
+    }
   };
 
   /* Projects the simulation by dt time in the future without actually computing it */

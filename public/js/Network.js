@@ -23,7 +23,7 @@
         var time = Date.now();
         socket.emit(
           'fetch',
-          {keys: input.keys, lastFrame: model.getState().timestamp},
+          {keys: input._keys, lastFrame: model.getState().timestamp},
           function (data) {
             var t1 = Date.now();
             try {

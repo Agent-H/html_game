@@ -1,7 +1,7 @@
 var game = require('./public/js/Game');
 var Model = require('./public/js/GameModel');
 var Player = require('./public/js/Player');
-var Input = require('./public/js/Input');
+var Input = require('./public/js/InputController');
 var config = require('./public/js/config')
 
 
@@ -26,7 +26,7 @@ exports.listen = function(io) {
     socket.broadcast.emit('log', 'user connected');
     var player = new Player();
 
-    var input = new Input(model);
+    var input = new Input();
     input.setPlayerId(player.attrs.id);
     inputs.clients[player.attrs.id] = input;
 
@@ -57,7 +57,9 @@ exports.listen = function(io) {
 
     var lastFetch = 0;
     socket.on('fetch', function(data, ack) {
-      input.keys = data.keys;
+
+      // TODO: unsafe access to private member
+      input._keys = data.keys;
 
       var time = Date.now();
 

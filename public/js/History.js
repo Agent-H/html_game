@@ -8,8 +8,8 @@
   } else {
     define(deps, factory);
   }
-}(['./util/LinkedQueue'],
-  function(LinkedQueue){
+}(['./util/LinkedList'],
+  function(LinkedList){
 
     /*
       Stores Game snapshots in chronological order.
@@ -20,7 +20,7 @@
     */
     function History(capacity) {
 
-      this._timestamps = new LinkedQueue();
+      this._timestamps = new LinkedList();
       this._size = 0;
       this._capacity = capacity;
 
@@ -33,10 +33,10 @@
 
       this._coll[timestamp] = snapshot;
 
-      this._timestamps.push(timestamp);
+      this._timestamps.pushBack(timestamp);
       if (++this._size >= this._capacity) {
         this._size--;
-        var ts = this._timestamps.pop();
+        var ts = this._timestamps.popFront();
         delete this._coll[ts];
       }
     };

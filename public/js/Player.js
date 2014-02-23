@@ -8,7 +8,8 @@
   } else {
     define(deps, factory);
   }
-}(['./ObjectsFactory', './config', './mixins', './Bullet'], function(ObjectsFactory, config, mixins, Bullet){
+}(['./ObjectsFactory', './config', './mixins', './Bullet', './Game'],
+  function(ObjectsFactory, config, mixins, Bullet, game){
   var Player = ObjectsFactory.create({
     attrs: {
       name: 'anonymous',
@@ -62,7 +63,7 @@
         bullet.attrs.x = this.attrs.x + config.PLAYER_BARREL_POS * Math.cos(this.attrs.angle);
         bullet.attrs.y = this.attrs.y + config.PLAYER_BARREL_POS * Math.sin(this.attrs.angle);
 
-        this.model.addBullet(bullet);
+        game.model.addBullet(bullet);
       }
     },
 
@@ -70,7 +71,7 @@
       this.move(dt);
       this.rotate(dt);
     }
-  }, mixins.TwoD, mixins.DirectionalMobile, mixins.Orientable, mixins.Actor);
+  }, mixins.TwoD, mixins.DirectionalMobile, mixins.Orientable);
 
   return Player;
 }));

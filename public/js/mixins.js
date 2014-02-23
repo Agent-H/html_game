@@ -55,14 +55,6 @@
       rotate: function (dt) {
         this.attrs.angle += this.attrs.angleV * dt;
       }
-    },
-
-    // Things that have an action on the model
-    Actor: {
-      model: null,
-      init: function() {
-        this.model = game.model;
-      }
     }
   }
   return mixins;

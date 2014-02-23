@@ -1,8 +1,8 @@
-require(['Game', 'Input', 'GameModel', 'GameView', 'Network'],
-  function(game, Input, GameModel, GameView, Network){
+require(['Game', 'KeyboardInput', 'GameModel', 'GameView', 'Network'],
+  function(game, Keyboard, GameModel, GameView, Network){
 
   var model = game.model = new GameModel();
-  var input = new Input(model);
+  var input = new Keyboard();
   var view = new GameView(canvas, game.model);
 
   game.addModule(input);
