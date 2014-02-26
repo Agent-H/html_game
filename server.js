@@ -4,6 +4,7 @@ var Player = require('./public/js/Player');
 var Input = require('./public/js/InputController');
 var config = require('./public/js/config')
 var events = require('./public/js/eventsManager');
+var NPCs = require('./public/js/NPCModule');
 
 exports.listen = function(io) {
 
@@ -17,24 +18,31 @@ exports.listen = function(io) {
   };
 
   var model = game.model = new Model();
+  var npcs = new NPCs(3);
+
   game.addModule(inputs);
+  game.addModule(npcs);
   game.addModule(model);
 
   game.start();
+  npcs.spawn(); // Creates npcs
 
   io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('log', 'user connected');
-    var player = new Player();
+    var player = new Player({
+      name: 'Human'
+    });
 
     var eventsBuffer = [];
     events.on('any', onEvent);
+    events.send('join', player.attrs);
 
     var input = new Input();
     input.setPlayerId(player.attrs.id);
     inputs.clients[player.attrs.id] = input;
 
     socket.on('disconnect', function() {
-      socket.broadcast.emit('log', 'user disconnected');
+      events.send('leave', player.attrs);
       model.removePlayer(player);
       events.off('any', onEvent);
       delete inputs.clients[player.attrs.id];

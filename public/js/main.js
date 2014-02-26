@@ -1,5 +1,6 @@
-require(['Game', 'KeyboardInput', 'GameModel', 'GameView', 'Network', './eventsManager'],
-  function(game, Keyboard, GameModel, GameView, Network, eventsManager){
+require(['Game', 'KeyboardInput', 'GameModel', 'GameView', 'Network', './eventsManager',
+'./effects/effects', './eventsLogger'],
+function( game,   Keyboard,        GameModel,   GameView,   Network,     eventsManager){
 
   var model = game.model = new GameModel();
   var input = new Keyboard();

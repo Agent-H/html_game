@@ -24,7 +24,7 @@
     this._isMaster = false;
 
     // Activate this if simulation is too heavy (only projects)
-    // this.step = this._project;
+    this.step = this._project;
   };
 
   GameModel.prototype.setMastrerMode = function() {
@@ -179,7 +179,7 @@
       } else {
         for (var j in this.state.players) {
           if (!this.state.players[j].isDead() && this.state.players[j].distanceTo(b) < config.PLAYER_HIT_RADIUS) {
-            this.state.players[j].hit();
+            this.state.players[j].hit(b);
 
             this.state.removeBulletId(i);
             break;
@@ -355,7 +355,7 @@
     delete this.players[player.attrs.id];
   };
 
-  GameState.prototype.removePlayerId = function(id) {
+  GameState.prototype.removePlayerWithId = function(id) {
     delete this.players[id];
   };
 

@@ -12,7 +12,7 @@
 
   var Bullet = ObjectsFactory.create({
 
-  }, mixins.TwoD, mixins.Mobile);
+  }, mixins.TwoD, mixins.Mobile, mixins.ownable);
 
   return Bullet;
 }));

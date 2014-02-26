@@ -55,6 +55,15 @@
       rotate: function (dt) {
         this.attrs.angle += this.attrs.angleV * dt;
       }
+    },
+
+    Ownable: {
+      attrs: {
+        owner: -1
+      },
+      getOwner: function() {
+        return game.model.getPlayer(this.attrs.owner);
+      }
     }
   }
   return mixins;

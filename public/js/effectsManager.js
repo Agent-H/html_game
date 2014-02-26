@@ -29,6 +29,12 @@
       });
     };
 
+    EffectsManager.prototype.addEffects = function(effects) {
+      for (var i in effects) {
+        this.addEffect(effects[i].on, effects[i].ctr, effects[i].params);
+      }
+    };
+
     EffectsManager.prototype.getEffects = function() {
       return this._effects;
     };

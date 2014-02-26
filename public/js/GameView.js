@@ -67,10 +67,10 @@
     ctx.rotate(p.angle);
 
     ctx.beginPath();
-    ctx.moveTo(5, 0);
-    ctx.lineTo(-5, 3);
-    ctx.lineTo(-5, -3);
-    ctx.lineTo(5, 0);
+    ctx.moveTo(6, 0);
+    ctx.lineTo(-6, 4);
+    ctx.lineTo(-6, -4);
+    ctx.lineTo(6, 0);
     ctx.fill();
 
     ctx.restore();
