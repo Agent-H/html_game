@@ -6,6 +6,8 @@ var config = require('./public/js/config')
 var events = require('./public/js/eventsManager');
 var NPCs = require('./public/js/NPCModule');
 
+var logic = require('./public/js/gameLogic');
+
 exports.listen = function(io) {
 
   var inputs = {
@@ -17,15 +19,18 @@ exports.listen = function(io) {
     }
   };
 
+  // We create the game here
   var model = game.model = new Model();
-  var npcs = new NPCs(3);
+  var npcs = new NPCs(2);
 
   game.addModule(inputs);
   game.addModule(npcs);
   game.addModule(model);
 
-  game.start();
   npcs.spawn(); // Creates npcs
+
+  // But all logic is handled in gameLogic
+  game.start();
 
   io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('log', 'user connected');
@@ -49,7 +54,7 @@ exports.listen = function(io) {
     });
 
     socket.on('join', function(data, ack) {
-      player.reset();
+      player.spawn();
       model.addPlayer(player);
       ack(player.attrs);
     });

@@ -28,6 +28,7 @@
 
       for (var i = 0 ; i < this._nNpcs ; i++) {
         bot = new NPC(i);
+        bot.player.spawn();
         this._npcs.push(bot);
         game.model.addPlayer(bot.player);
       }
@@ -37,14 +38,13 @@
     var THRESHOLD = 0.1;
     var ENGAGE_DIST = 100;
     var SPAWN_DELAY = 2000;
-    var RETARGET_DELAY = 500;
+    var RETARGET_DELAY = 200;
     var FIRE_DELAY = 500;
 
     function NPC(id) {
       this.player = new Player({
         name: 'Bot ' + id
       });
-      this.player.reset();
       this._target = null;
       this._targetCounter = 0;
       this._spawnCounter = 0;
@@ -54,7 +54,7 @@
     NPC.prototype.step = function(dt) {
       if (this.player.isDead()) {
         if ((this._spawnCounter+= dt) >= SPAWN_DELAY) {
-          this.player.reset();
+          this.player.spawn();
           this._spawnCounter = 0;
         }
         return;

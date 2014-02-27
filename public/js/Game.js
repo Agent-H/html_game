@@ -8,7 +8,7 @@
   } else {
     define(deps, factory);
   }
-}(['./Tick'], function(Tick){
+}(['./Tick', './eventsManager'], function(Tick, events){
   function Game() {
     this.modules = [];
 
@@ -26,10 +26,12 @@
   };
 
   Game.prototype.pause = function() {
+    events.send('gamePause', this);
     this.tick.stop();
   }
 
   Game.prototype.start = function() {
+    events.send('gameStart', this);
     this.tick.start();
   }
 

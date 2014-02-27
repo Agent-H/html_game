@@ -19,12 +19,12 @@
       lives: config.PLAYER_INITIAL_LIVES
     },
 
-    reset: function() {
+    spawn: function() {
       this.attrs.x = config.WORLD_WIDTH * (Math.random() * 0.8) + 100;
       this.attrs.y = config.WORLD_HEIGHT * (Math.random() * 0.8) + 100;
-      this.attrs.score = 0;
       this.attrs.lastFire = 0;
       this.attrs.lives = config.PLAYER_INITIAL_LIVES;
+      events.send('spawn', this.attrs);
     },
 
     turnLeft: function() {
@@ -36,8 +36,6 @@
 
     moveForward: function() {
       this.attrs.vx = config.PLAYER_FWD_SPEED;
-
-      events.send('mvFwd', {x: this.attrs.x, y: this.attrs.y});
     },
     moveBackward: function() {
       this.attrs.vx = -config.PLAYER_BWD_SPEED;
@@ -45,14 +43,13 @@
 
     hit: function(b) {
       if (this.attrs.lives > 0) {
+        events.send('playerHit', this.dumpAttributes());
         if (--this.attrs.lives <= 0) {
           events.send('playerDead', this.dumpAttributes());
           events.send('kill', {
             killer: b.attrs.owner,
             killee: this.attrs.id
           });
-        } else {
-          events.send('playerHit', this.dumpAttributes());
         }
       }
     },

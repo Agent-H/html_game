@@ -8,27 +8,31 @@
   } else {
     define(deps, factory);
   }
-}(['../effectsManager', './Explosion'], function (effectsManager, Explosion) {
+}(['../effectsManager', './Explosion', './Aura'],
+  function (effectsManager, Explosion, Aura) {
 
   effectsManager.addEffects([{
     on: 'playerHit',
     ctr: Explosion,
     params: {
-      particles: 4,
-      color: '#0ff',
+      particles: 8,
+      color: '#f35',
       maxSpeed: 0.07,
       minSpeed: 0.03,
-      life: 200
+      life: 400
     }
   }, {
     on: 'playerDead',
     ctr: Explosion,
     params: {
-      particles: 20,
+      particles: 100,
       color: '#c92',
-      maxSpeed: 0.3,
-      life: 1000
+      maxSpeed: 0.7,
+      life: 1500
     }
+  }, {
+    on: 'spawn',
+    ctr: Aura
   }]);
 
 }));

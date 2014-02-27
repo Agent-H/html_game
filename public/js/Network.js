@@ -41,10 +41,6 @@
         );
       }
 
-      socket.on('log', function(msg) {
-        console.log(msg);
-      });
-
       input.on('join', function(){
         socket.emit('join', {}, function(p) {
           var player = new Player(p);

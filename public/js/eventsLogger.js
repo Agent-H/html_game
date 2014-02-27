@@ -29,4 +29,8 @@
     console.log(attrs.name + ' (' + attrs.id + ') left the game');
   });
 
+  events.on('spawn', function(attrs) {
+    console.log(attrs.name + ' (' + attrs.id + ') spawned');
+  });
+
 }));

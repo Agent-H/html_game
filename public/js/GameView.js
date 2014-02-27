@@ -26,6 +26,7 @@
     var ctx = this.ctx;
 
     var players = model.getPlayers();
+    var player = this.model.getPlayer(this.playerId);
     var bullets = model.getBullets();
     var effects = effectsManager.getEffects();
     var p;
@@ -39,6 +40,7 @@
     ctx.fillStyle = '#f00';
     for (var i in players) {
       if (!players[i].isDead() && players[i].attrs.id != this.playerId) {
+        this.drawLifeBar(players[i].attrs, ctx);
         this.drawArrow(players[i].attrs, ctx);
       }
     }
@@ -58,6 +60,30 @@
     for (var i in effects) {
       effects[i].draw(ctx, dt);
     }
+
+    // UI
+    // TODO put hearts here
+    this.drawScore(player.attrs.score, ctx);
+  };
+
+  GameView.prototype.drawScore = function(s, ctx) {
+    ctx.fillStyle = '#ff0';
+    ctx.font = "20pt Arial";
+    ctx.fillText("Score: "+s, 700, 30);
+  };
+
+  GameView.prototype.drawLifeBar = function(p, ctx) {
+    ctx.save();
+
+    var sep = (p.lives / config.PLAYER_INITIAL_LIVES) * 30;
+
+    ctx.translate(p.x, p.y);
+    ctx.fillStyle = '#0f0';
+    ctx.fillRect(-15, -10, sep, 3);
+    ctx.fillStyle = '#f00';
+    ctx.fillRect(-15 + sep, -10, 30 - sep, 3);
+
+    ctx.restore();
   };
 
   GameView.prototype.drawArrow = function(p, ctx) {
@@ -70,7 +96,7 @@
     ctx.moveTo(6, 0);
     ctx.lineTo(-6, 4);
     ctx.lineTo(-6, -4);
-    ctx.lineTo(6, 0);
+    ctx.closePath();
     ctx.fill();
 
     ctx.restore();
