@@ -34,6 +34,18 @@
         }
       }
       return out;
+    },
+
+    bindAll: function(obj) {
+      var names = Array.prototype.slice.call(arguments, 1);
+      for (var i in names) {
+        obj[names[i]] = obj[names[i]].bind(obj);
+      }
+    },
+
+    // Cheap way to type number vars (int or float)
+    isInt: function(nb) {
+      return nb.toString().indexOf('.') === -1;
     }
   };
 

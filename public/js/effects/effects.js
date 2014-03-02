@@ -15,7 +15,7 @@
     on: 'playerHit',
     ctr: Explosion,
     params: {
-      particles: 8,
+      particles: 10,
       color: '#f35',
       maxSpeed: 0.07,
       minSpeed: 0.03,
@@ -25,10 +25,10 @@
     on: 'playerDead',
     ctr: Explosion,
     params: {
-      particles: 100,
+      particles: 80,
       color: '#c92',
-      maxSpeed: 0.7,
-      life: 1500
+      maxSpeed: 0.13,
+      life: 1000
     }
   }, {
     on: 'spawn',

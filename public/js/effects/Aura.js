@@ -17,12 +17,16 @@
 
     init: function(data, params) {
       this.attrs.counter = 0;
-      this.attrs.life = 3000;
+      this.attrs.life = 2000;
 
-      this.attrs.target = game.model.getPlayer(data.id);
+      this.attrs.target = data.id;
     },
 
     draw: function(ctx, dt) {
+      var target = game.model.getPlayer(this.attrs.target);
+      if (target == null) {
+        return this.destroy();
+      }
       if ((this.attrs.counter += dt) > this.attrs.life) {
         this.destroy();
         return;
@@ -33,7 +37,7 @@
       ctx.save();
 
       ctx.strokeStyle = '#acf';
-      ctx.translate(this.attrs.target.attrs.x, this.attrs.target.attrs.y);
+      ctx.translate(target.attrs.x, target.attrs.y);
 
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI*2);

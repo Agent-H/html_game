@@ -26,12 +26,12 @@
   };
 
   Game.prototype.pause = function() {
-    events.send('gamePause', this);
+    events.send('gamePause');
     this.tick.stop();
   }
 
   Game.prototype.start = function() {
-    events.send('gameStart', this);
+    events.send('gameStart');
     this.tick.start();
   }
 

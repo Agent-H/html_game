@@ -45,6 +45,10 @@
       return this._coll[timestamp];
     };
 
+    History.prototype.getLast = function() {
+      return this._coll[this._timestamps.back()]
+    };
+
     return History;
   })
 );

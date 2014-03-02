@@ -33,7 +33,7 @@
         try {
           this._events[event][i].apply(this, Array.prototype.slice.call(arguments, 1));
         } catch(e) {
-          console.error(e);
+          console.error(e.stack);
         }
       }
     }

@@ -29,9 +29,11 @@
             try {
               eventsManager.sendAllMaster(data.evt);
               if (data.diff !== undefined) {
-                model.update(data.diff);
+                console.log('diff');
+                model.updateWithDiff(data.diff);
               } else if (data.state !== undefined) {
-                model.setStateFromSnapshot(data.state);
+                console.log('state');
+                model.updateWithSnapshot(data.state);
               }
             } catch (e) {
               console.error(e.stack);

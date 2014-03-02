@@ -35,11 +35,12 @@
     };
 
 
-    var THRESHOLD = 0.1;
+    var THRESHOLD = 0.05;
     var ENGAGE_DIST = 100;
     var SPAWN_DELAY = 2000;
     var RETARGET_DELAY = 200;
     var FIRE_DELAY = 500;
+    var FIRE_THRESHOLD = 0.15;
 
     function NPC(id) {
       this.player = new Player({
@@ -49,6 +50,9 @@
       this._targetCounter = 0;
       this._spawnCounter = 0;
       this._fireCounter = 0;
+      this._isBored = false;
+      this._boredCounter = 0;
+      this._faceBackCounter = 0;
     }
 
     NPC.prototype.step = function(dt) {
@@ -90,22 +94,48 @@
 
       this.player.resetControls();
 
-      if (diff > THRESHOLD) {
+      if (this._isBored) {
+        if ((this._boredCounter-=dt) <= 0) {
+          this._isBored = false;
+        }
+      } else if (Math.random() < 0.001 * dt) {
+        this._isBored = true;
+        this._boredCounter = 1000;
+      }
+
+      if (Math.abs(diff) > 3 && (this._faceBackCounter -= dt) > 0) {
+        this.player.moveForward();
+        return;
+      }
+
+      if (diff > THRESHOLD || (diff < -THRESHOLD && this._isBored)) {
         this.player.moveForward();
         this.player.turnLeft();
-      } else if (diff < -THRESHOLD) {
+        if (diff < FIRE_THRESHOLD) {
+          this.tryFire(dt);
+        }
+      } else if (diff < -THRESHOLD || (diff > -THRESHOLD && this._isBored)) {
         this.player.moveForward();
         this.player.turnRight();
+        if (diff > -FIRE_THRESHOLD) {
+          this.tryFire(dt);
+        }
       } else {
-        if (dist < ENGAGE_DIST) {
+        /*if (dist < ENGAGE_DIST) {
           this.player.moveBackward();
-        } else if (dist > ENGAGE_DIST) {
+        } else if (dist > ENGAGE_DIST) {*/
           this.player.moveForward();
-        }
-        if ((this._fireCounter+= dt) >= FIRE_DELAY) {
-          this.player.fire();
-          this._fireCounter = 0;
-        }
+          this._faceBackCounter = 300;
+        //}
+        this.tryFire(dt);
+      }
+
+    };
+
+    NPC.prototype.tryFire = function(dt) {
+      if ((this._fireCounter+= dt) >= FIRE_DELAY) {
+        this.player.fire();
+        this._fireCounter = 0;
       }
     };
 
@@ -115,6 +145,7 @@
 
       for (var i in players) {
         if (i == this.player.attrs.id) continue;
+
 
         var d = players[i].distanceTo(this.player);
 

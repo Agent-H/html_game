@@ -63,7 +63,9 @@
 
     // UI
     // TODO put hearts here
-    this.drawScore(player.attrs.score, ctx);
+    if (player != null) {
+      this.drawScore(player.attrs.score, ctx);
+    }
   };
 
   GameView.prototype.drawScore = function(s, ctx) {

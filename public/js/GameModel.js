@@ -8,8 +8,8 @@
   } else {
     define(deps, factory);
   }
-}(['./ObjectsFactory', './GameObject', './config', './mixins', './Player', './Bullet', './History'],
-  function(ObjectsFactory, GameObject, config, mixins, Player, Bullet, History){
+}(['./ObjectsFactory', './GameObject', './config', './mixins', './Player', './Bullet', './History', './util/LowPassFilter'],
+  function(ObjectsFactory, GameObject, config, mixins, Player, Bullet, History, LowPassFilter){
 
   function GameModel() {
     this.state = new GameState();
@@ -17,13 +17,13 @@
     this._isMaster = true;
     this._history = new History(config.HISTORY_DEPTH);
 
-    this.projectedTime = 0;
+    // TODO: factor out the lagg smoothing part
+    this._updateTime = new LowPassFilter(config.UPDATE_TIME_SMOOTHING);
+    this._lastUpdateTs = 0;
   }
 
   GameModel.prototype.setSlaveMode = function() {
     this._isMaster = false;
-
-    // Activate this if simulation is too heavy (only projects)
     this.step = this._project;
   };
 
@@ -46,15 +46,16 @@
     if (this._isMaster) {
       this.state.setTimestamp();
       this._history.add(this.state.takeSnapshot());
-    } else {
-      this.projectedTime += dt;
     }
   };
 
-  /* Projects the simulation by dt time in the future without actually computing it */
-  GameModel.prototype._project = function(dt) {
-    this._move(dt);
-    this.projectedTime += dt;
+
+  GameModel.prototype._project = function() {
+    if (this._lastSnap != null) {
+      this.state.applySnapshot(this._lastSnap);
+      this.state.interpolateWith(this._history.getLast(),
+        (Date.now() - this._lastUpdateTs)/this._updateTime.value);
+    }
   };
 
   GameModel.prototype.step = GameModel.prototype._simulate;
@@ -62,20 +63,56 @@
   /*
     Updates the model with a diff.
   */
-  GameModel.prototype.update = function(diff) {
+  GameModel.prototype.updateWithDiff = function(diff) {
+    if (this._isMaster) throw new Error('Cannot use update in master mode');
     var snap = this._history.get(diff.from);
     if (snap == null) {
       console.error("dropped !");
       return;
     }
+
+    // saves last snapshot for interpolation
+    this._lastSnap = this.state.takeSnapshot();
+
+    // Computes and saves new snapshot
     this.state.applySnapshot(snap);
     this.state.applyDiff(diff);
     this._history.add(this.state.takeSnapshot());
 
-    if (!this._isMaster) {
-      this._compensateUpdateLagg();
+    // Saves update time and starts interpolation
+    var now = Date.now();
+    if (this._lastUpdateTs !== 0) {
+      this._updateTime.addSample(now - this._lastUpdateTs);
+      this._lastUpdateTs = now;
+      this._project();
+    } else {
+      this._lastUpdateTs = now;
+    }
+
+  };
+
+  GameModel.prototype.updateWithSnapshot = function (snap) {
+    if (this._isMaster) throw new Error('Cannot use update in master mode');
+
+    // saves last snapshot for interpolation
+    this._lastSnap = this._history.getLast();
+
+    // Computes and save new snapshot
+    this.state.applySnapshot(snap);
+    this._history.add(snap);
+
+    // Saves update time and starts interpolation
+    var now = Date.now();
+    if (this._lastUpdateTs !== 0) {
+      this._updateTime.addSample(now - this._lastUpdateTs);
+      this._lastUpdateTs = now;
+      this._project();
+    } else {
+      this._lastUpdateTs = now;
     }
   };
+
+
 
   // Returns a snapshot for the provided timestamp
   GameModel.prototype.getSnapshot = function(timestamp) {
@@ -84,15 +121,6 @@
 
   GameModel.prototype.setState = function (newState) {
     this.state = newState;
-  };
-
-  GameModel.prototype.setStateFromSnapshot = function (snap) {
-    this.state.applySnapshot(snap);
-    this._history.add(snap);
-
-    if (!this._isMaster) {
-      this._compensateUpdateLagg();
-    }
   };
 
   GameModel.prototype.getState = function() {
@@ -133,6 +161,7 @@
   // So that the latter follows the former without bursts.
   GameModel.prototype._compensateUpdateLagg = function() {
     var delta = this.projectedTime - this.state.timestamp;
+    console.log(delta);
     this.projectedTime = this.state.timestamp;
     if (delta > 0) {
 
@@ -344,6 +373,33 @@
     for (var i in diff.bullets) {
       this.bullets[i].setAttributes(diff.bullets[i]);
     }
+  };
+
+  // Interpolates what can be interpolated, uses snapshot values for added/deleted items
+  GameState.prototype.interpolateWith = function(snap, progress) {
+    this.timestamp = snap.timestamp;
+
+    var newPlayers = {};
+    for (var i in snap.players) {
+      if (this.players[i] === undefined) {
+        newPlayers[i] = new Player(snap.players[i]);
+      } else {
+        newPlayers[i] = this.players[i].interpolateAttributes(snap.players[i], progress);
+      }
+    }
+    // Garbage
+    this.players = newPlayers;
+
+    var newBullets = {};
+    for (var i in snap.bullets) {
+      if (this.bullets[i] === undefined) {
+        newBullets[i] = new Bullet(snap.bullets[i]);
+      } else {
+        newBullets[i] = this.bullets[i].interpolateAttributes(snap.bullets[i], progress);
+      }
+    }
+    // Garbage
+    this.bullets = newBullets;
   };
 
 

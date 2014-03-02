@@ -49,6 +49,19 @@
       }
 
       return this;
+    },
+
+    interpolateAttributes: function(attrs, p) {
+      if (typeof p !== 'number') throw new Error("Progress is not a number");
+      for (var i in attrs) {
+        if (typeof attrs[i] === 'number' && !utils.isInt(attrs[i])) {
+          this.attrs[i] = (attrs[i] - this.attrs[i])*p + this.attrs[i];
+        } else {
+          this.attrs[i] = attrs[i];
+        }
+      }
+
+      return this;
     }
   };
 

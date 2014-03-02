@@ -33,4 +33,18 @@
     console.log(attrs.name + ' (' + attrs.id + ') spawned');
   });
 
+  events.on('endOfGame', function(attrs) {
+    console.log("stop !!!");
+  });
+
+
+  // TEST CODE
+  events.on('gamePause', function(attrs) {
+    game.pause();
+  });
+
+  events.on('gameStart', function() {
+    game.start();
+  });
+
 }));

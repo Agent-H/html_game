@@ -73,10 +73,10 @@
     };
 
     LinkedList.prototype.back = function() {
-      return this._tail.value;
+      return this._tail && this._tail.value;
     };
     LinkedList.prototype.front = function() {
-      return this._root.value;
+      return this._root && this._root.value;
     };
 
     LinkedList.prototype.isEmpty = function() {

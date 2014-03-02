@@ -6,7 +6,7 @@ var config = require('./public/js/config')
 var events = require('./public/js/eventsManager');
 var NPCs = require('./public/js/NPCModule');
 
-var logic = require('./public/js/gameLogic');
+var DeathmatchScenario = require('./public/js/scenarios/DeathmatchScenario');
 
 exports.listen = function(io) {
 
@@ -19,18 +19,20 @@ exports.listen = function(io) {
     }
   };
 
+
+
   // We create the game here
   var model = game.model = new Model();
   var npcs = new NPCs(2);
+  var scenario = new DeathmatchScenario(game, npcs);
 
   game.addModule(inputs);
   game.addModule(npcs);
   game.addModule(model);
+  game.addModule(scenario);
 
   npcs.spawn(); // Creates npcs
-
-  // But all logic is handled in gameLogic
-  game.start();
+  scenario.start(); // Starts game
 
   io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('log', 'user connected');
@@ -65,7 +67,7 @@ exports.listen = function(io) {
     }
 
     function transmitState(data, ack) {
-      if (typeof data.lastFrame !== 'undefined') {
+      if (false /*typeof data.lastFrame !== 'undefined'*/) {
         var snap = model.getSnapshot(data.lastFrame);
         if (snap != null) {
           ack({diff: model.getState().makeDiff(snap), evt: eventsBuffer});
@@ -97,9 +99,12 @@ exports.listen = function(io) {
       } else {
         lastFetch = time;
         // lagg simulation:
-        //setTimeout(function(){
-        transmitState(data, ack);
-        //}, Math.random() * 250);
+        // setTimeout(function(){
+          transmitState(data, ack);
+        // },
+        //   120); // Constant lagg
+        //   Math.random() * 120); // Random lagg
+        //   100 + Math.random(20));
       }
     });
   });
